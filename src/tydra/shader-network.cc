@@ -155,12 +155,13 @@ bool GetSinglePath(const Relationship &rel, Path *path) {
 
 } // namespace local
 
-bool GetBoundMaterial(
+bool GetLocalMaterialBinding(
   const Stage &_stage,
   const Prim &prim,
   const std::string &suffix,
   tinyusdz::Path *materialPath,
   const Material **material,
+  tinyusdz::value::token *bindMaterialAs,
   std::string *err) {
 
   if (materialPath == nullptr) {
@@ -173,6 +174,11 @@ bool GetBoundMaterial(
     if (suffix.empty()) {
       if (gprim->materialBinding.has_value()) {
         if (GetSinglePath(gprim->materialBinding.value(), materialPath)) {
+          if (gprim->materialBinding.value().metas().bindMaterialAs.has_value()) {
+            if (bindMaterialAs) {
+              (*bindMaterialAs) = gprim->materialBinding.value().metas().bindMaterialAs.value();
+            }
+          }
 
           const Prim *p;
           if (stage.find_prim_at_path(*materialPath, p, err)) {
@@ -230,7 +236,7 @@ bool GetBoundMaterial(
   return ret;
 }
 
-bool FindBoundMaterial(
+bool GetBoundMaterial(
   const Stage &_stage,
   const Path &abs_path,
   const std::string &suffix,
