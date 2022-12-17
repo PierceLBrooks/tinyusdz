@@ -78,6 +78,9 @@ bool EvaluateShaderAttribute(
 /// @param[out] materialPaths Target Paths.
 /// @param[out] materials THe pointer to found Material object in Stage(if no Material object found in Stage, returns nullptr)
 /// @param[out] bindMaterialAsToken Token of `bindMaterialAs` Property metadatum. Return empty token when no `bindMaterialAs` Property metadatum exists.
+/// @param[out] err Error message(filled when failed).
+/// @param[in] t Optinal. TimeCode.
+///
 /// @return true when all bound Material Path and Material object is found.
 ///
 bool GetLocalMaterialBinding(
@@ -87,7 +90,8 @@ bool GetLocalMaterialBinding(
   std::vector<tinyusdz::Path> *materialPaths, 
   std::vector<const Material *> *materials,
   value::token *bindMaterialAsTokens,
-  std::string *err);
+  std::string *err,
+  double t = value::TimeCode::Default());
 
 ///
 /// Get material:binding target Path from given Prim absolute path.
@@ -106,6 +110,9 @@ bool GetLocalMaterialBinding(
 /// @param[in] suffix extra suffix(e.g. empty string is given, look into `material:binding`. `correction:shafts` is given, look into `material:binding:correction:shafts`.)
 /// @param[out] materialPath Found target Path.
 /// @param[out] material THe pointer to found Material object in Stage(if no Material object found in Stage, returns nullptr)
+/// @param[out] err Error message(filled when failed).
+/// @param[in] t Optinal. TimeCode.
+///
 /// @return true when bound Material Path is found.
 ///
 bool GetBoundMaterial(
@@ -114,7 +121,8 @@ bool GetBoundMaterial(
   const std::string &suffix,
   tinyusdz::Path *materialPath, 
   const Material **material,
-  std::string *err);
+  std::string *err,
+  double t = value::TimeCode::Default());
 
 }  // namespace tydra
 }  // namespace tinyusdz

@@ -153,18 +153,43 @@ bool GetSinglePath(const Relationship &rel, Path *path) {
   return false;
 }
 
+bool GetPaths(const Relationship &rel, std::vector<Path> *paths) {
+  if (!paths) {
+    return false;
+  }
+
+  if (rel.is_path()) {
+    paths->resize(1);
+    (*paths)[0] = rel.targetPath;
+    return true;
+  } else if (rel.is_pathvector()) {
+    if (rel.targetPathVector.size() > 0) {
+      (*paths) = rel.targetPathVector;
+      return true;
+    }
+  }
+
+  paths->clear();
+
+  return false;
+
+}
+
 } // namespace local
 
 bool GetLocalMaterialBinding(
   const Stage &_stage,
   const Prim &prim,
   const std::string &suffix,
-  tinyusdz::Path *materialPath,
-  const Material **material,
+  std::vector<tinyusdz::Path> *materialPaths,
+  std::vector<const Material *> *materials,
   tinyusdz::value::token *bindMaterialAs,
-  std::string *err) {
+  std::string *err,
+  double t) {
 
-  if (materialPath == nullptr) {
+  // TODO: timesample
+  (void)t;
+  if (materialPaths == nullptr) {
     return false;
   }
 
@@ -173,19 +198,25 @@ bool GetLocalMaterialBinding(
   auto apply_fun = [&](const Stage &stage, const GPrim *gprim) -> bool {
     if (suffix.empty()) {
       if (gprim->materialBinding.has_value()) {
-        if (GetSinglePath(gprim->materialBinding.value(), materialPath)) {
+        if (GetPaths(gprim->materialBinding.value(), materialPaths)) {
           if (gprim->materialBinding.value().metas().bindMaterialAs.has_value()) {
             if (bindMaterialAs) {
               (*bindMaterialAs) = gprim->materialBinding.value().metas().bindMaterialAs.value();
             }
           }
 
-          const Prim *p;
-          if (stage.find_prim_at_path(*materialPath, p, err)) {
-            if (p->is<Material>() && (material != nullptr)) {
-              (*material) = p->as<Material>();
-            } else {
-              (*material) = nullptr;
+          if (materials) {
+            materials->resize(materialPaths->size());
+
+            for (size_t i = 0; i < materialPaths->size(); i++) {
+              const Prim *p;
+              if (stage.find_prim_at_path(materialPaths->at(i), p, err)) {
+                if (p->is<Material>()) {
+                  (*materials)[i] = p->as<Material>();
+                } else {
+                  (*materials)[i] = nullptr; // targetPath is not Material Prim
+                }
+              }
             }
           }
 
@@ -193,15 +224,21 @@ bool GetLocalMaterialBinding(
         }
       }
     } else if (suffix == "correction") {
+      // TODO: correction:NAME
       if (gprim->materialBindingCorrection.has_value()) {
-        if (GetSinglePath(gprim->materialBindingCorrection.value(), materialPath)) {
+        if (GetPaths(gprim->materialBindingCorrection.value(), materialPaths)) {
 
-          const Prim *p;
-          if (stage.find_prim_at_path(*materialPath, p, err)) {
-            if (p->is<Material>() && (material != nullptr)) {
-              (*material) = p->as<Material>();
-            } else {
-              (*material) = nullptr;
+          if (materials) {
+            materials->resize(materialPaths->size());
+            for (size_t i = 0; i < materialPaths->size(); i++) {
+              const Prim *p;
+              if (stage.find_prim_at_path(materialPaths->at(i), p, err)) {
+                if (p->is<Material>()) {
+                  (*materials)[i] = p->as<Material>();
+                } else {
+                  (*materials)[i] = nullptr;
+                }
+              }
             }
           }
 
@@ -210,14 +247,20 @@ bool GetLocalMaterialBinding(
       }
     } else if (suffix == "preview") {
       if (gprim->materialBindingPreview.has_value()) {
-        if (GetSinglePath(gprim->materialBindingPreview.value(), materialPath)) {
+        if (GetPaths(gprim->materialBindingPreview.value(), materialPaths)) {
 
-          const Prim *p{nullptr};
-          if (stage.find_prim_at_path(*materialPath, p, err)) {
-            if (p->is<Material>() && (material != nullptr)) {
-              (*material) = p->as<Material>();
-            } else {
-              (*material) = nullptr;
+          if (materials) {
+            materials->resize(materialPaths->size());
+
+            for (size_t i = 0; i < materialPaths->size(); i++) {
+              const Prim *p{nullptr};
+              if (stage.find_prim_at_path(materialPaths->at(i), p, err)) {
+                if (p->is<Material>()) {
+                  (*materials)[i] = p->as<Material>();
+                } else {
+                  (*materials)[i] = nullptr;
+                }
+              }
             }
           }
 
