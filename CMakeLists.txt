@@ -613,6 +613,7 @@ if(TINYUSDZ_WITH_OPENSUBDIV)
 
     # Build as Object Library(non archival collections)
     add_library(osd_cpu ${OSD_FAR_SOURCES} ${OSD_SDC_SOURCES} ${OSD_VTR_SOURCES} ${OSD_OSD_SOURCES})
+    install(TARGETS osd_cpu)
     target_include_directories(osd_cpu PRIVATE ${osd_DIR})
     set_target_properties(osd_cpu PROPERTIES POSITION_INDEPENDENT_CODE ON)
     
@@ -848,6 +849,7 @@ endif()
 #add_sanitizers(${TINYUSDZ_TARGET_STATIC})
 
 add_library(${TINYUSDZ_TARGET_STATIC} STATIC ${TINYUSDZ_SOURCES} ${TINYUSDZ_DEP_SOURCES} ${TINYUSDZ_EXT_SOURCES})
+install(TARGETS ${TINYUSDZ_TARGET_STATIC})
 set_target_properties(${TINYUSDZ_TARGET_STATIC} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 #set_target_properties(tinyusdz_object PROPERTIES FOLDER "tinyusdz")
 
@@ -860,6 +862,7 @@ if(TINYUSDZ_BUILD_SHARED_LIBS)
   #  ${TINYUSDZ_TARGET} SHARED $<TARGET_OBJECTS:tinyusdz_object>)
   add_library(
     ${TINYUSDZ_TARGET} SHARED ${TINYUSDZ_SOURCES} ${TINYUSDZ_DEP_SOURCES} ${TINYUSDZ_EXT_SOURCES})
+  install(TARGETS ${TINYUSDZ_TARGET})
   #add_sanitizers(${TINYUSDZ_TARGET})
 
   # for dllexport
@@ -1038,6 +1041,7 @@ endforeach()
 if(TINYUSDZ_WITH_C_API)
   if(TINYUSDZ_BUILD_SHARED_LIBS)
     add_library(${BUILD_TARGET_C} SHARED ${TINYUSDZ_C_API_SOURCES})
+    install(TARGETS ${BUILD_TARGET_C})
     # Link with static(object) version of libtinyusdz to make dll monolitic
     # TODO: Build TINYUSDZ_TARGET_STATIC as Object?
     target_link_libraries(${BUILD_TARGET_C} PRIVATE ${TINYUSDZ_TARGET_STATIC})
@@ -1048,6 +1052,7 @@ if(TINYUSDZ_WITH_C_API)
   endif() 
 
   add_library(${BUILD_TARGET_C}_static STATIC ${TINYUSDZ_C_API_SOURCES})
+  install(TARGETS ${BUILD_TARGET_C}_static)
   target_link_libraries(${BUILD_TARGET_C}_static PRIVATE ${TINYUSDZ_TARGET_STATIC})
   target_include_directories(
     ${BUILD_TARGET_C}_static PRIVATE ${PROJECT_SOURCE_DIR}/src)
